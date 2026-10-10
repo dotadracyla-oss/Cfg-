@@ -1,0 +1,485 @@
+UNIX LUA API — v1.0
+===================
+
+1. КАК ПОЛЬЗОВАТЬСЯ
+
+Lua встроен в DLL. Отдельный lua.exe, LuaJIT или внешний Lua DLL не нужны.
+Версия интерпретатора: Lua 5.4.9, исходники с https://www.lua.org/ftp/.
+Описание языка: https://www.lua.org/manual/5.4/manual.html.
+
+Папка скриптов:
+    C:\Unix\Script
+Обычно:
+    C:\Users\Petrosyan\AppData\Local\Unix\scripts
+
+При первом запуске новой DLL создаются папка, эта документация и три примера:
+    01_hud.lua       — своё окно HUD: FPS, ping, рассудок, тип призрака.
+    02_events.lua    — сообщения об охоте, гост-ивенте и благовонии.
+    03_crosshair.lua — вращающийся прицел с выбором формы.
+Существующие файлы примеров не перезаписываются. Примеры сами не запускаются.
+Копия api.txt в папке скриптов обновляется из текущей DLL.
+Их копии также находятся в scripts/ внутри проекта.
+
+Открой меню Unix → Lua → выбери скрипт → Load.
+После загрузки справа появятся его чекбоксы, слайдеры и другие контролы.
+Stop останавливает скрипт и освобождает его Lua-контекст.
+Reload загружает новую версию. При ошибке нового кода старая работающая версия
+продолжает работать; ошибка появляется в Console.
+Refresh scripts обновляет список. Папка также проверяется раз в секунду.
+Autorun сохраняет выбор: скрипт загрузится при следующем запуске Lua-системы.
+Reload on file change автоматически перезагружает изменённый файл.
+Open scripts folder открывает папку; Open API documentation — этот api.txt.
+
+Файл должен иметь расширение .lua. В имени допустимы латинские буквы,
+цифры, пробелы, '_' и '-'. Подпапки и ссылки на другие файлы не сканируются.
+Например: my_hud.lua. Код и строки сохраняй в UTF-8.
+
+Перезагрузка скрипта и загрузка/выгрузка игровой DLL — разные операции.
+Lua Load/Reload работает внутри уже запущенного Unix.
+
+2. МИНИМАЛЬНЫЙ СКРИПТ
+
+    local enabled = ui.checkbox("enabled", "My text", true)
+
+    client.on("on_frame", function(dt)
+        if not enabled:get() then return end
+        render.text(30, 160, render.color(160, 140, 255), "Hello Unix", 18)
+    end)
+
+ui.checkbox создаётся один раз в верхнем уровне файла.
+enabled:get() читает текущее состояние. enabled:set(false) меняет его.
+on_frame запускает функцию на кадре, dt — время кадра в секундах.
+Для анимаций используй dt, а не фиксированное прибавление на каждом кадре.
+
+3. МОДУЛЬ client
+
+client.on(event_name, function)
+    Регистрирует обработчик. Вызывать только на верхнем уровне файла.
+    До 8 обработчиков одного события. Порядок — порядок регистрации.
+    Доступные события:
+
+    on_frame(dt)
+        Кадровая логика и рисование. Вызывается и при закрытом меню.
+        dt: number, секунды текущего кадра.
+        При исчерпании общего бюджета кадра скрипты получают очередь
+        по кругу; следующий вызов может быть на следующем кадре.
+
+    on_menu()
+        Вызывается при открытом меню после его отрисовки.
+        Контролы ui.* рисуются автоматически; создавать их здесь не надо.
+
+    on_hunt_start(event)
+        Переход доступного состояния призрака в охоту.
+        event.duration: уже прошедшие секунды на момент обнаружения.
+        event.partial: начало наблюдается не с начала охоты.
+        event.test: false.
+
+    on_hunt_end(event)
+        Завершение наблюдавшейся охоты.
+        event.duration: последнее известное прошедшее время;
+                        точность ограничена частотой данных Unix.
+        event.partial: наблюдение началось посреди охоты.
+
+    on_ghost_event(event)
+        Новый гост-ивент из уведомлений Unix.
+        event.test: true для кнопки Test notification.
+        event.partial: событие уже было активно при его обнаружении.
+
+    on_incense(event)
+        Unix зафиксировал новое применение благовония.
+
+    on_ui_change(id, value)
+        Изменился свой контрол скрипта. Обычно приходит на следующем кадре.
+        id — локальный идентификатор; value — bool, number, индекс или цвет.
+        button передаёт true. Частые изменения могут объединяться.
+
+    on_shutdown()
+        Stop, успешный Reload или завершение Lua-системы.
+        Рисовать здесь нельзя. Скрипт, остановленный ошибкой, этот обработчик
+        не выполняет. Изменения общих settings.* сами не откатываются.
+
+    События не создают новые game-hooks: используют уже собранные данные Unix.
+    Держи Ghost information/Hunt timer включёнными для данных охоты, а
+    Ghost / hunt notifications — для гост-ивентов. Неизвестные данные имеют
+    valid=false. Активная охота при старте системы не выдаётся за новую.
+
+client.log(...)
+print(...)
+    Запись в Console выбранного скрипта. До 128 строк, до 2048 байт в строке.
+    Избегай print на каждом кадре. Для редкого лога используй client.every.
+
+client.time() -> number
+    Монотонное время Windows в секундах; это не часы и не Unix timestamp.
+
+client.fps() -> number
+    Сглаженный FPS ImGui/отрисовки Unix.
+
+client.info() -> table
+    name, version (версия API), lua_version, memory (байты Lua),
+    memory_limit (байты), last_ms (длительность последнего обработчика).
+
+client.after(seconds, function) -> timer_id
+    Однократный таймер. Пример:
+        client.after(2, function() client.log("Two seconds passed") end)
+
+client.every(seconds, function) -> timer_id
+    Повторяющийся таймер. Пример:
+        local timer = client.every(1, function() client.log(game.ghost().type) end)
+
+client.cancel(timer_id) -> boolean
+    Удаляет таймер; false, если его уже нет.
+    Можно отменять таймер внутри него самого.
+
+    Интервал 0.01..3600 секунд, до 64 таймеров на скрипт.
+    Таймеры работают на кадрах, а не в отдельном потоке. Пропущенные интервалы
+    не догоняются пачкой. Рисуй в on_frame/on_menu, а не внутри таймера.
+    После Stop/Reload старые таймеры удаляются.
+
+4. МОДУЛЬ ui
+
+Контролы создавай только на верхнем уровне файла. До 64 на скрипт.
+id: строка до 48 символов, латинские буквы/цифры/'_'/'-', уникальная в файле.
+label: подпись до 96 байт UTF-8.
+Контролы используют оригинальные widgets из Imgui Portifolio #8.
+
+ui.checkbox(id, label, default_boolean) -> control
+    local show = ui.checkbox("show", "Show HUD", true)
+    show:get() -> boolean
+    show:set(false)
+
+ui.slider(id, label, default_number, min, max) -> control
+    local size = ui.slider("size", "Size", 20, 4, 100)
+    size:get() -> number
+    size:set(25)
+    min < max; числа конечные, диапазон -100000..100000.
+
+ui.combo(id, label, items_table, default_index=1) -> control
+    local mode = ui.combo("mode", "Mode", {"Text", "Ring"}, 1)
+    mode:get() -> integer
+    mode:set(2)
+    От 1 до 32 строк. Индексы Lua здесь начинаются с 1.
+
+ui.color(id, label, rgba_table) -> control
+    local tint = ui.color("tint", "Tint", render.color(120, 90, 255, 220))
+    tint:get() -> {r, g, b, a}
+    tint:set({255, 255, 255, 255})
+    Каналы 0..255. Возвращается новая таблица, не ссылка на внутренний цвет.
+
+ui.button(id, label) -> control
+    local reset = ui.button("reset", "Reset")
+    if reset:get() then ... end
+    get() возвращает нажатие и сбрасывает его; следующий get() — false.
+    Кнопка не сохраняет своё нажатие на диск.
+
+control:get() / control:set(value)
+    Чтение/запись контролов доступны в обработчиках.
+    set проверяет тип и диапазон. Значения обычных контролов сохраняются
+    отдельно для каждого скрипта. После загрузки сохранённое значение имеет
+    приоритет над default. При изменении диапазона значение ограничивается
+    новым диапазоном. Правый клик открывает оригинальные бинды меню; такие
+    дополнительные бинды живут в текущей сессии, отдельно от значения контрола.
+
+5. МОДУЛЬ render
+
+Рисование доступно только в on_frame и on_menu. Результат — текущий кадр:
+если хочешь видеть объект постоянно, рисуй его каждый кадр.
+Координаты: пиксели от левого верхнего угла, X вправо, Y вниз.
+Положение из game.players()/objects()/ghost_room() — нормализованное:
+    local w, h = render.screen()
+    local pixel_x, pixel_y = object.x * w, object.y * h
+
+render.screen() -> width, height
+    Размер текущей области отрисовки.
+
+render.color(r=255, g=255, b=255, a=255) -> {r,g,b,a}
+    Цвет: целочисленные каналы 0..255, a — прозрачность.
+    Во все функции цвета можно передать обычную таблицу {120,90,255,255}.
+
+render.text(x, y, color, text, size=текущий_размер_шрифта)
+    UTF-8 текст текущим шрифтом ImGui. size: 6..72 пикселя.
+    До 1024 байт. Кириллица зависит от загруженного в меню шрифта.
+
+render.measure_text(text, size=текущий_размер_шрифта) -> width, height
+    Размер текста тем же шрифтом. Вызывать внутри кадрового обработчика.
+
+render.line(x1, y1, x2, y2, color, thickness=1)
+render.rect(x, y, width, height, color, rounding=0, thickness=1)
+render.rect_filled(x, y, width, height, color, rounding=0)
+render.circle(x, y, radius, color, thickness=1)
+render.circle_filled(x, y, radius, color)
+    Толщина 0.1..20. Размеры прямоугольника 0..10000, радиус 0..5000.
+    До 1024 вызовов рисования на один dispatch события у одного скрипта.
+    Overlay рисуется поверх игрового изображения; низкоуровневый D3D не нужен.
+
+6. МОДУЛЬ game — КОПИИ СОБРАННЫХ ДАННЫХ
+
+game.status() -> table
+    camera: boolean — доступна камера;
+    ping: number — миллисекунды, -1 если неизвестно;
+    sanity: number — локальный рассудок 0..100;
+    fear: number — 100 - sanity, производное значение;
+    sanity_valid: boolean — можно ли использовать sanity/fear;
+    sampled_at: number — время последней выборки в шкале client.time();
+    ticks: number — число обновлений данных;
+    ghost_room: string — имя комнаты призрака;
+    menu_open: boolean.
+
+game.ghost() -> table
+    valid: boolean; type: string; activity: string;
+    speed: number — измеренная скорость, м/с;
+    speed_valid: boolean;
+    hunting: boolean;
+    hunt_seconds: number — прошедшее время наблюдавшейся охоты;
+    partial_hunt: boolean — охота наблюдается не с начала.
+    Не показывай speed как достоверную, если speed_valid=false.
+
+game.players() -> array of tables
+    name: string; actor: number;
+    sanity: number; fear: number (100 - sanity); valid: boolean;
+    visible: boolean — есть проекция в экран, не проверка видимости стенами;
+    x, y: нормализованные экранные координаты метки;
+    distance: number — метры.
+    Может быть пустым, когда данные игроков недоступны/не собираются.
+
+game.room() -> table
+    valid, name, temperature, temperature_valid,
+    power_valid, power_on, switches, switches_on.
+    temperature — температура текущей комнаты, если temperature_valid=true.
+    Если power_valid=false, состояние питания неизвестно.
+
+game.objects() -> array of tables
+    name: string;
+    kind: "bone" | "cursed" | "exit" | "hiding" | "unknown";
+    x, y: нормализованные координаты;
+    distance: метры;
+    blocked: boolean — отметка блокировки укрытия.
+    Возвращаются уже спроецированные метки Unix, а не весь список Unity.
+
+game.ghost_room() -> table
+    visible, x, y, distance.
+    Маркер комнаты призрака, а не текущая позиция призрака.
+
+game.incense() -> table
+    available: boolean — доступно наблюдение использования;
+    used_at: number — время применения в шкале client.time(), 0 если нет;
+    elapsed: number — сколько прошло секунд после применения.
+    Это прошедшее время, не обещание времени защиты от конкретного призрака.
+
+Массивы и таблицы — новые копии. Изменение player.sanity в Lua не меняет игру.
+Проверяй valid/visible и остальные флаги перед рисованием/расчётами.
+Часть данных зависит от включённых функций Unix. Lua не делает отдельное
+сканирование памяти игры и не даёт сырые Unity/IL2CPP указатели.
+
+7. МОДУЛЬ settings — НАСТРОЙКИ UNIX
+
+settings.get(name) -> boolean | number | nil
+    nil, если настройка не найдена.
+
+settings.set(name, value)
+    Меняет настройку Unix. Проверяет точный тип и допустимый диапазон.
+    Недопустимая настройка/значение останавливает скрипт с ошибкой.
+    Изменения видны в обычном меню и применяются существующей логикой Unix.
+    Boolean требует true/false, а не 0/1. Integer — целое число.
+    Встроенные speed_bind/skeleton_bind/crosshair_style используют индексы
+    C++, начиная с 0; это отличается от собственных ui.combo, где начало с 1.
+
+settings.list() -> array of {name, type, min, max}
+    Полный список доступных полей и актуальных диапазонов.
+    Например:
+        for _, field in ipairs(settings.list()) do
+            client.log(field.name, field.type, field.min, field.max)
+        end
+
+Пример бинда своего скрипта:
+    client.on("on_frame", function(dt)
+        if input.pressed(0x78) then -- F9
+            settings.set("skeleton", not settings.get("skeleton"))
+        end
+    end)
+
+Цвета обычных настроек хранятся отдельными полями 0..1:
+    skeleton_color0..3, map_tint0..3, lighting_color0..3,
+    crosshair_color0..3, ui_accent0..3.
+Это отличается от таблиц цветов render/ui.color, где каналы 0..255.
+settings.set не сохраняет обычный профиль автоматически, если Auto Save
+выключен. Для постоянного профиля используй кнопку Save в меню Unix.
+
+8. МОДУЛЬ input
+
+input.down(vk) -> boolean
+    Клавиша удерживается.
+input.pressed(vk) -> boolean
+    Клавиша перешла из отпущенного состояния в нажатое на текущем кадре.
+
+vk — Windows virtual-key code 1..255. Примеры:
+    0x2D Insert; 0x77 F8; 0x78 F9; 0x79 F10;
+    0x10 Shift; 0x11 Ctrl; 0x12 Alt; 0x20 Space;
+    0x41 A; 0x44 D; 0x53 S; 0x57 W;
+    0x05 Mouse4; 0x06 Mouse5.
+Ввод для скриптов отключён, если игра не в фокусе или активен ввод текста.
+pressed действует на текущем кадре: скрипт, пропущенный из-за перегрузки
+кадра, может пропустить этот фронт. Для удержания используй input.down.
+
+9. МОДУЛЬ storage — СВОИ СОХРАНЁННЫЕ ЗНАЧЕНИЯ
+
+storage.get(key, default=nil) -> boolean | number | string | default
+storage.set(key, value)
+    Значение: boolean, конечное число -1e12..1e12, строка до 2048 байт.
+    nil удаляет ключ. Таблицы и функции не сохраняются.
+    key — строка до 64 байт. У каждого файла своё хранилище.
+    До 192 записей, включая автоматически сохранённые значения контролов.
+
+    local visits = storage.get("visits", 0) + 1
+    storage.set("visits", visits)
+    client.log("Loaded", visits, "times")
+
+Сохранение объединяется: после примерно 750 мс без изменений либо при Stop.
+Файл: scripts\state\имя_скрипта.lua.ini.
+При изменении значений на каждом кадре диск не пишется на каждом кадре;
+Stop сохраняет последнее состояние. Имя файла — идентификатор хранилища:
+если переименовать .lua, у него будет другое хранилище.
+Формат состояния — внутренний текстовый формат с hex-кодированием строк.
+Выбор Autorun/Reload on file change хранится отдельно в scripts\manager.ini.
+
+10. ОШИБКИ И ЛИМИТЫ
+
+Каждый скрипт получает отдельный Lua state. Его глобальные переменные,
+обработчики и storage не смешиваются с соседними скриптами.
+Ошибка компиляции/обработчика видна в Console с именем файла и строкой;
+ошибка выполнения переводит этот скрипт в Error, соседние работают дальше.
+При исправлении нажми Load/Reload или включи Reload on file change.
+
+Лимиты:
+    до 32 обнаруженных скриптов;
+    исходник до 512 KiB;
+    Lua-память до 8 MiB, 64 KiB оставляются для передачи аргументов;
+    до 100000 Lua-инструкций на dispatch и около 5 мс через instruction hook;
+    ориентир общего исполнения on_frame — 8 мс на кадр, очередь по кругу;
+    on_menu также имеет общий ориентир 8 мс;
+    до 64 контролов, 64 таймеров и 16 ожидающих событий на скрипт.
+
+Эти ограничения останавливают Lua-циклы. Hook проверяет время через каждые
+1000 Lua-инструкций и не прерывает уже выполняющуюся C-функцию, файловый
+ввод-вывод или сборку мусора посреди операции. Это бюджет исполнения,
+а не гарантия точного времени кадра. Не делай большие циклы и не копируй
+game.players()/objects() много раз в одном обработчике.
+
+Доступны базовый язык, math, string, table и utf8.
+print перенаправлен в Console.
+Не подключены io, os, package, debug и coroutine; нет require, dofile,
+loadfile, load, collectgarbage, pcall и xpcall. pcall/xpcall убраны, чтобы
+скрипт не перехватывал и не игнорировал ошибку лимита инструкций.
+Нет FFI, загрузки DLL, сетевого API, process/memory API и произвольного
+доступа к файлам. Для постоянных значений используй storage.
+
+Это ограниченный встроенный интерпретатор, не отдельная изоляция процесса.
+Скрипты выполняются в потоке отрисовки. Не используй sleep/ожидание;
+отложенную работу делай через client.after/client.every.
+
+11. СБОРКА И РАСПОЛОЖЕНИЕ КОДА
+
+src/scripting/runtime.cpp — жизненный цикл VM, budgets, события, таймеры,
+                           сохранение и обнаружение файлов.
+src/scripting/api.cpp     — client/ui/render/game/settings/input/storage.
+src/ui/portfolio/pages/lua_page.cpp — менеджер и оригинальные контролы.
+third_party/lua/src       — исходники Lua 5.4.9.
+src/scripting/bundled_examples.hpp — встроенные примеры и эта документация.
+
+Сборка: Visual Studio, Release | x64. Lua собирается как C++ внутри DLL,
+чтобы ошибки Lua корректно раскручивали C++-стек. Дополнительный Lua runtime
+рядом с инжектором не требуется. Инжектор вшивает пересобранную Unix DLL.
+
+Офлайн-проверки системы и изображения меню не доказывают работу игровой
+телеметрии: она требует отдельной проверки уже запущенной версии Unix.
+
+12. СПИСОК SETTINGS
+Ниже автоматически перечислены имена, типы и диапазоны из config::fields.
+Тот же список возвращает settings.list() во время выполнения.
+
+LUA CONSOLE (обновление)
+Консоль открывается автоматически при новой ошибке, даже с закрытым меню.
+Lua -> Open console открывает её вручную. Errors only фильтрует ошибки;
+Search ищет по имени файла, callback и тексту; Copy копирует видимый лог.
+Export logs сохраняет историю каждого скрипта в C:/Unix/Script/logs/<script>.log.
+Clear очищает историю, но не запускает остановленный из-за ошибки скрипт.
+История: последние 256 сообщений на скрипт, до 16384 символов на сообщение.
+Ошибка содержит имя файла, строку, callback (или timer #id) и stack traceback.
+Для исправления nil проверьте объект перед обращением: if ghost then ... end.
+client.warn("текст") — жёлтое сообщение.
+client.error("текст") — красное сообщение и открытие консоли, скрипт продолжает работу.
+error("текст") — Lua исключение: скрипт останавливается, другие работают дальше.
+После исправления файла нажмите Load/Reload. Неудачный Reload работающего
+скрипта оставляет старую VM активной. Логи обеих версий сохраняются.
+
+Имя настройки                   Тип        Диапазон
+ui_auto_save                    boolean    0..1
+ui_theme                        integer    0..1
+ui_menu_key                     integer    1..255
+ui_animations                   number     0..200
+bone_esp                        boolean    0..1
+cursed_esp                      boolean    0..1
+exit_esp                        boolean    0..1
+hiding_esp                      boolean    0..1
+incense_timer                   boolean    0..1
+room_info                       boolean    0..1
+active_list                     boolean    0..1
+speed_bind_mode                 integer    0..1
+skeleton_bind_mode              integer    0..1
+skeleton                        boolean    0..1
+fullbright                      boolean    0..1
+no_fog                          boolean    0..1
+custom_fov                      boolean    0..1
+fov                             number     30..140
+brightness                      number     0.1..5
+map_color                       boolean    0..1
+infinite_stamina                boolean    0..1
+speed_hack                      boolean    0..1
+speed_multiplier                number     0.25..5
+speed_bind                      integer    0..5
+custom_lighting                 boolean    0..1
+lighting_power                  number     0.1..5
+ghost_room                      boolean    0..1
+player_sanity                   boolean    0..1
+ghost_notifications             boolean    0..1
+custom_exposure                 boolean    0..1
+exposure                        number     -5..5
+hunt_timer                      boolean    0..1
+player_labels                   boolean    0..1
+ghost_info                      boolean    0..1
+skeleton_bind                   integer    0..5
+watermark                       boolean    0..1
+show_fear                       boolean    0..1
+crosshair                       boolean    0..1
+crosshair_rainbow               boolean    0..1
+crosshair_rotate                boolean    0..1
+crosshair_style                 integer    0..2
+crosshair_size                  number     6..160
+crosshair_thickness             number     1..8
+crosshair_rotation_speed        number     -360..360
+crosshair_rainbow_speed         number     0.02..1
+ui_accent0                      number     0..1
+ui_accent1                      number     0..1
+ui_accent2                      number     0..1
+ui_accent3                      number     0..1
+skeleton_color0                 number     0..1
+skeleton_color1                 number     0..1
+skeleton_color2                 number     0..1
+skeleton_color3                 number     0..1
+map_tint0                       number     0..1
+map_tint1                       number     0..1
+map_tint2                       number     0..1
+map_tint3                       number     0..1
+lighting_color0                 number     0..1
+lighting_color1                 number     0..1
+lighting_color2                 number     0..1
+lighting_color3                 number     0..1
+crosshair_color0                number     0..1
+crosshair_color1                number     0..1
+crosshair_color2                number     0..1
+crosshair_color3                number     0..1
+ui_scale                        number     0.5..3
+
+Дополнительно: speed_bind/skeleton_bind = 0:F6, 1:F7, 2:F8, 3:Alt, 4:Mouse4, 5:Mouse5.
+speed_bind_mode/skeleton_bind_mode = 0:Toggle, 1:Hold.
+crosshair_style = 0:67, 1:Cross, 2:Reference.
+ui_theme = 0:Night, 1:Light. ui_menu_key — Windows virtual key.
