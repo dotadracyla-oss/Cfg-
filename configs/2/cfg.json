@@ -1,4 +1,10 @@
 {
-  "schema": 1,
-  "configs": {}
+  "configs": {
+    "798b0e2a95ccca9b": {
+      "content": "version=1\nfullbright=0\nfov=90\nbind=\"skeleton\" \"Skeleton\" 119 1 1 0 1 0 0 0 0\n",
+      "created": 1791662447,
+      "name": "Cloud verification"
+    }
+  },
+  "schema": 1
 }
