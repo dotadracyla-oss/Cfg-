@@ -1,3 +1,4 @@
+local function tr(en, ru) return settings.get("ui_language") == 1 and ru or en end
 local enabled = ui.checkbox("enabled", "Event notifications", true)
 local lifetime = ui.slider("lifetime", "Duration", 5, 1, 10)
 local count = storage.get("hunts", 0)
@@ -13,17 +14,17 @@ end
 client.on("on_hunt_start", function(event)
     count = count + 1
     storage.set("hunts", count)
-    add("Hunt started / #" .. count, render.color(250, 105, 115))
+    add(tr("Hunt started / #","Охота началась / №") .. count, render.color(250, 105, 115))
 end)
 client.on("on_hunt_end", function(event)
-    add(string.format("Hunt ended / %.1f s%s", event.duration,
-        event.partial and " (partial)" or ""), render.color(130, 220, 170))
+    add(string.format(tr("Hunt ended / %.1f s%s","Охота закончилась / %.1f с%s"), event.duration,
+        event.partial and tr(" (partial)"," (неполная)") or ""), render.color(130, 220, 170))
 end)
 client.on("on_ghost_event", function(event)
-    add(event.test and "Test notification" or "Ghost event", render.color(155, 145, 250))
+    add(event.test and tr("Test notification","Тест уведомления") or tr("Ghost event","Гост ивент"), render.color(155, 145, 250))
 end)
 client.on("on_incense", function(event)
-    add("Incense used", render.color(240, 210, 120))
+    add(tr("Incense used","Благовоние использовано"), render.color(240, 210, 120))
 end)
 client.on("on_frame", function(dt)
     if not enabled:get() then return end
