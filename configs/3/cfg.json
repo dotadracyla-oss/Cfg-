@@ -14,6 +14,11 @@
       "content": "version=1\nfullbright=0\nfov=90\nbind=\"skeleton\" \"Skeleton\" 119 1 1 0 1 0 0 0 0\n",
       "created": 1791662395,
       "name": "Cloud verification"
+    },
+    "e624ad3191eaf42b": {
+      "content": "version=1\nui_auto_save=0\nui_theme=1\nui_menu_key=46\nui_animations=100\nbone_esp=1\ncursed_esp=1\nexit_esp=1\nhiding_esp=1\nincense_timer=1\nroom_info=1\nactive_list=1\nspeed_bind_mode=0\nskeleton_bind_mode=0\nskeleton=0\nfullbright=0\nno_fog=0\ncustom_fov=1\nfov=111\nbrightness=2\nmap_color=1\ninfinite_stamina=1\nspeed_hack=1\nspeed_multiplier=2.52999997\nspeed_bind=5\ncustom_lighting=0\nlighting_power=0.100000001\nghost_room=1\nplayer_sanity=1\nghost_notifications=1\ncustom_exposure=1\nexposure=2.88034201\nhunt_timer=1\nplayer_labels=0\nghost_info=1\nskeleton_bind=4\nwatermark=1\nshow_fear=0\ncrosshair=1\ncrosshair_rainbow=1\ncrosshair_rotate=1\ncrosshair_style=0\ncrosshair_size=20\ncrosshair_thickness=1\ncrosshair_rotation_speed=138\ncrosshair_rainbow_speed=1\nui_accent0=1\nskeleton_color0=1\nmap_tint0=0.649999976\nlighting_color0=1\ncrosshair_color0=0.400000006\nui_accent1=1\nskeleton_color1=1\nmap_tint1=0.800000012\nlighting_color1=1\ncrosshair_color1=0.850000024\nui_accent2=1\nskeleton_color2=1\nmap_tint2=1\nlighting_color2=1\ncrosshair_color2=1\nui_accent3=1\nskeleton_color3=1\nmap_tint3=1\nlighting_color3=1\ncrosshair_color3=1\nui_scale=1\n",
+      "created": 1791725566,
+      "name": "default"
     }
   },
   "schema": 1
