@@ -5,6 +5,11 @@
       "created": 1791713126,
       "name": "default"
     },
+    "a1d7575cb3b76f96": {
+      "content": "version=1\nghost_chams=0\nghost_chams_style=1\nghost_chams_intensity=1\nui_auto_save=0\nui_theme=0\nui_language=1\nui_menu_key=46\nui_animations=200\nbone_esp=0\ncursed_esp=1\nexit_esp=0\nhiding_esp=0\nincense_timer=1\nroom_info=0\nactive_list=1\nspeed_bind_mode=0\nskeleton_bind_mode=0\nskeleton=0\nfullbright=0\nno_fog=0\ncustom_fov=1\nfov=100.273506\nbrightness=2\nmap_color=1\ninfinite_stamina=1\nspeed_hack=1\nspeed_multiplier=2.4352951\nspeed_bind=5\ncustom_lighting=1\nlighting_power=0.100000001\nghost_room=0\nplayer_sanity=1\nghost_notifications=1\ncustom_exposure=1\nexposure=3.07925415\nhunt_timer=1\nplayer_labels=1\nghost_info=0\nskeleton_bind=4\nwatermark=1\nshow_fear=0\ncrosshair=1\ncrosshair_rainbow=0\ncrosshair_rotate=1\ncrosshair_style=0\ncrosshair_size=20\ncrosshair_thickness=1\ncrosshair_rotation_speed=336.279724\ncrosshair_rainbow_speed=1\nghost_chams_color0=0.65882355\nui_accent0=0.65882355\nskeleton_color0=1\nmap_tint0=0.649999976\nlighting_color0=0.680175424\ncrosshair_color0=0.65882355\nghost_chams_color1=0.886274517\nui_accent1=0.886274517\nskeleton_color1=1\nmap_tint1=0.800000012\nlighting_color1=0.680175424\ncrosshair_color1=0.886274517\nghost_chams_color2=1\nui_accent2=1\nskeleton_color2=1\nmap_tint2=1\nlighting_color2=0.680175424\ncrosshair_color2=1\nghost_chams_color3=0.072807014\nui_accent3=1\nskeleton_color3=1\nmap_tint3=1\nlighting_color3=0.185087726\ncrosshair_color3=1\nui_scale=1\nbind=\"ghost_chams\" \"Ghost chams\" 6 1 1 0 1 0 0 0 0\n",
+      "created": 1791724621,
+      "name": "legit"
+    },
     "b0245f3d1f569f10": {
       "content": "version=1\nfullbright=0\nfov=90\nbind=\"skeleton\" \"Skeleton\" 119 1 1 0 1 0 0 0 0\n",
       "created": 1791662395,
