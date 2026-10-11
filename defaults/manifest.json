@@ -8,15 +8,19 @@
     },
     {
       "path": "Script/01_hud.lua",
-      "sha256": "36d48b81ebc4200225ac546fb6351f9fab071c43f07d9559d787018b9e866435"
+      "sha256": "f8b8f07e8ddb781c1ca5d1e3052afa0b0a4d74b51b3f1d453b194cb7be38dffb"
     },
     {
       "path": "Script/02_events.lua",
-      "sha256": "70f7125d3436d498433716752b36438ac4511150c3fbe58cebd16a5652cb4777"
+      "sha256": "d48eb1d27d01f73cc112a88c7809c86120736bf1cabd09f10111468a236b94c2"
     },
     {
       "path": "Script/03_crosshair.lua",
       "sha256": "8cb54d439fa3e17c9cd286ce7bbfeb025f32e6f19933a7d7746c7e936d123395"
+    },
+    {
+      "path": "Script/api.txt",
+      "sha256": "1f90db7eefb4b65123490c9b035b045d5a5b3e78990d2b54ecaf3cafc3f8418e"
     }
   ]
 }
