@@ -1,3 +1,4 @@
+local function tr(en, ru) return settings.get("ui_language") == 1 and ru or en end
 -- Unix Lua: custom HUD, with controls in the Lua tab.
 local enabled = ui.checkbox("enabled", "Custom HUD", true)
 local x = ui.slider("x", "Position X", 24, 0, 1920)
@@ -18,7 +19,7 @@ client.on("on_frame", function(dt)
     local sanity = status.sanity_valid and string.format("%.0f%%", status.sanity) or "--"
     local kind = ghost.valid and ghost.type or "--"
     render.text(px + 14, py + 63, render.color(185, 180, 210),
-        "Sanity: " .. sanity .. " | Ghost: " .. kind, 14)
+        tr("Sanity: ","Рассудок: ") .. sanity .. tr(" | Ghost: "," | Призрак: ") .. kind, 14)
 end)
 
 client.on("on_ui_change", function(id, value)
