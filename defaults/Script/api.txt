@@ -1,4 +1,5 @@
-UNIX LUA API - v1.0
+UNIX LUA API - v2.0
+Extensions: see api_v2.txt (HTTP/HTTPS, browser, features, transparent HUD).
 ==================
 
 Getting started
@@ -171,7 +172,8 @@ The hook checks every 1000 instructions and cannot interrupt a running C call.
 These are execution budgets, not a strict frame-time guarantee.
 Available: base, math, string, table, utf8.
 Unavailable: io, os, package, debug, coroutine, require, dofile, loadfile, load,
-collectgarbage, pcall, xpcall, FFI, networking and arbitrary process/file access.
+collectgarbage, pcall, xpcall, FFI and arbitrary process/file access.
+HTTP/HTTPS and browser URL opening are available through the API v2 modules.
 Use storage for persistence and client.after/every for delayed work.
 Scripts execute on the rendering thread; do not busy-wait.
 
@@ -188,6 +190,9 @@ Settings reference
 ------------------
 
 Setting                         Type       Range
+ghost_chams                     boolean    0..1
+ghost_chams_style               integer    0..1
+ghost_chams_intensity           number     1..10
 ui_auto_save                    boolean    0..1
 ui_theme                        integer    0..1
 ui_language                     integer    0..1
@@ -211,7 +216,7 @@ brightness                      number     0.1..5
 map_color                       boolean    0..1
 infinite_stamina                boolean    0..1
 speed_hack                      boolean    0..1
-speed_multiplier                number     0.25..5
+speed_multiplier                number     0.25..10
 speed_bind                      integer    0..5
 custom_lighting                 boolean    0..1
 lighting_power                  number     0.1..5
@@ -234,6 +239,10 @@ crosshair_size                  number     6..160
 crosshair_thickness             number     1..8
 crosshair_rotation_speed        number     -360..360
 crosshair_rainbow_speed         number     0.02..1
+ghost_chams_color0              number     0..1
+ghost_chams_color1              number     0..1
+ghost_chams_color2              number     0..1
+ghost_chams_color3              number     0..1
 ui_accent0                      number     0..1
 ui_accent1                      number     0..1
 ui_accent2                      number     0..1
@@ -255,3 +264,26 @@ crosshair_color1                number     0..1
 crosshair_color2                number     0..1
 crosshair_color3                number     0..1
 ui_scale                        number     0.5..3
+
+
+Unix Lua API 2.0 - extensions (API names are English)
+render.opacity(value) -- 0..1, multiplies alpha for subsequent drawing calls.
+render.layer("background" | "foreground") -- background draws below Unix UI.
+Both reset at each callback. render colors use {r,g,b,a} in 0..255.
+Alpha 0 is invisible, 128 is translucent, 255 is opaque. No HUD background is implicit.
+http.request(url, {method="GET", body="", headers={Accept="application/json"}}) -> request_id
+Methods: GET POST PUT PATCH DELETE HEAD OPTIONS. HTTP and HTTPS, normal TLS verification.
+http.poll(request_id) -> nil while pending; response table once complete.
+Response: {ok, status, body, headers, error}. Unknown/consumed ID: nil, error.
+Maximum 8 outstanding requests per script, request body 256 KiB, response 1 MiB.
+Network runs on workers. Pending workers are joined when the script unloads.
+browser.open(url) -> success, optional error_code. Opens HTTP/HTTPS in the default browser.
+features.list() -> {FeatureName={SettingName=value,...},...}
+features.get("GodMode", "Enabled") -> value or nil
+features.set("GodMode", "Enabled", true) -> true
+Feature colors use normalized RGBA {0..1,0..1,0..1,0..1}; unlike render colors.
+features.actions() -> available stable action IDs
+features.trigger("action_Teleport_Truck") -> known_action
+Call HTTP, browser and feature mutations from callbacks, not at script top level.
+Actions still require the relevant game state/host permissions.
+Native Unix settings remain accessible through settings.list/get/set.

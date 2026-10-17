@@ -20,7 +20,19 @@
     },
     {
       "path": "Script/api.txt",
-      "sha256": "1f90db7eefb4b65123490c9b035b045d5a5b3e78990d2b54ecaf3cafc3f8418e"
+      "sha256": "9dcda9c6911fa738389df35947bb0a76cb08f1cc832efd535eb5e8e3b474fe8f"
+    },
+    {
+      "sha256": "8b949f75ba84545b6adb7b6b8dbb198e4530660f2af3131a539ff5ee2a31b48e",
+      "path": "Script/api_v2.txt"
+    },
+    {
+      "sha256": "00525211582e4ed62e5aaf124523957931f213a73332e6e3b57d162f77a59ec5",
+      "path": "Script/04_transparent_hud.lua"
+    },
+    {
+      "sha256": "62a1700c3135a2e395306e98b61c5cd8b444251feb5e65e8d67fdfef15e579d4",
+      "path": "Script/05_http.lua"
     }
   ]
 }

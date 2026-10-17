@@ -1,0 +1,10 @@
+-- Unix Lua API 2.0: alpha is 0..255; zero removes the background.
+local alpha = ui.slider("alpha", "HUD background alpha", 100, 0, 255)
+local opacity = ui.slider("opacity", "HUD opacity", 1, 0, 1)
+client.on("on_frame", function()
+    render.layer("background")
+    render.opacity(opacity:get())
+    render.rect_filled(24, 180, 250, 72, {18, 18, 24, alpha:get()}, 10)
+    render.text(36, 192, {255, 255, 255, 255}, "Unix custom HUD", 18)
+    render.text(36, 220, {180, 180, 200, 255}, "FPS: " .. math.floor(client.fps()), 14)
+end)
