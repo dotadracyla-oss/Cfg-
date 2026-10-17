@@ -128,10 +128,10 @@ settings.list() -> array of {name,type,min,max}
 Booleans require true/false; integer fields require whole numbers.
 Changes apply through existing Unix logic. Use Save or Auto Save to persist.
 Color fields: ui_accent0..3, skeleton_color0..3, map_tint0..3,
-lighting_color0..3, crosshair_color0..3, ghost_chams_color0..3, arm_chams_color0..3,
-item_chams_color0..3; channels 0..1, unlike ui/render colors.
+lighting_color0..3, crosshair_color0..3, ghost_chams_color0..3; channels 0..1,
+unlike ui/render colors.
 Self tab: infinite_stamina, speed_hack, speed_multiplier (0.25..100), custom_fov, fov,
-third_person, third_person_distance, arm_chams, item_chams (+ _style, _color, item_chams_range).
+third_person, third_person_distance.
 ui_language: 0=English (default), 1=Russian. Script text is controlled by the
 script; check settings.get("ui_language") for your own translations.
 ui_theme: 0=Night, 1=Light; ui_menu_key: Windows virtual-key code.
@@ -246,12 +246,8 @@ crosshair_size                  number     6..160
 crosshair_thickness             number     1..8
 crosshair_rotation_speed        number     -360..360
 crosshair_rainbow_speed         number     0.02..1
-arm_chams                       boolean    0..1
-arm_chams_style                 integer    0..1
-item_chams                      boolean    0..1
-item_chams_style                integer    0..1
-item_chams_range                number     5..100
-ghost_chams_color0              number     0..1
+discord_rpc                     boolean    0..1
+ghost_chams_color0             number     0..1
 ghost_chams_color1              number     0..1
 ghost_chams_color2              number     0..1
 ghost_chams_color3              number     0..1
@@ -275,14 +271,6 @@ crosshair_color0                number     0..1
 crosshair_color1                number     0..1
 crosshair_color2                number     0..1
 crosshair_color3                number     0..1
-arm_chams_color0                number     0..1
-arm_chams_color1                number     0..1
-arm_chams_color2                number     0..1
-arm_chams_color3                number     0..1
-item_chams_color0               number     0..1
-item_chams_color1               number     0..1
-item_chams_color2               number     0..1
-item_chams_color3               number     0..1
 ui_scale                        number     0.5..3
 
 
