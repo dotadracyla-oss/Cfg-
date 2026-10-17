@@ -20,10 +20,10 @@
     },
     {
       "path": "Script/api.txt",
-      "sha256": "20f1800c78a98dd156bb153f1e750d708a504ce7728dd0d6c527baf94b7bf0a8"
+      "sha256": "9b52e4deaddef5401539f3f0034b2c805bdd2438a86d53f7562b60d110f787b6"
     },
     {
-      "sha256": "0ac88870f69a71510820d7657e4de4721220ea478c8b94bcdd98bf2fdfc975f5",
+      "sha256": "165c79a1bb27682ba4cb67e11bd96186f92179474124c5ebf98e4d95c7525136",
       "path": "Script/api_v2.txt"
     },
     {
@@ -37,6 +37,10 @@
     {
       "sha256": "5bc3579ed5e057163d73ad02e6d3d2a2e087909f591367348f30651125fc4de1",
       "path": "Script/06_draggable_hud.lua"
+    },
+    {
+      "path": "Script/07_browser.lua",
+      "sha256": "89775c24ee9f3efe072119045c2d701d521b35a129032080aca0a29e53dd0657"
     }
   ]
 }

@@ -12,7 +12,19 @@ http.poll(request_id) -> nil while pending; response table once complete.
 Response: {ok, status, body, headers, error}. Unknown/consumed ID: nil, error.
 Maximum 8 outstanding requests per script, request body 256 KiB, response 1 MiB.
 Network runs on workers. Pending workers are joined when the script unloads.
-browser.open(url) -> success, optional error_code. Opens HTTP/HTTPS in the default browser.
+browser.open(url, mode="2d") -> queued (boolean). Embedded WebView2; HTTP/HTTPS only.
+Modes: "2d" on-screen window, "3d" Unity world surface, "both" shared page in both.
+browser.close() hides both surfaces and stops page navigation/audio.
+browser.place(x,y,z,yaw=0,width=2.4,height=1.35) sets the world panel position in Unity units.
+3D opening automatically places the panel 2.5 units in front of the current player camera.
+browser.status() -> {running, ready, frames, title, error}; ready means WebView2 is ready.
+One shared page/profile for all scripts. Call mutations from callbacks.
+2D: address bar, back, reload, close, mouse, wheel and keyboard. 3D button places the panel ahead.
+3D uses a real Unity quad, external D3D11 texture and Unlit/Texture material; scene depth applies.
+Click a world panel to focus input; Escape releases keyboard focus.
+Requires Microsoft Edge WebView2 Runtime. Chromium keeps normal TLS verification.
+The browser capture runs on a separate STA thread and is uploaded at up to 15 frames/second.
+Native Unity panel rendering/interaction must be verified in-game for the installed build.
 features.list() -> {FeatureName={SettingName=value,...},...}
 features.get("GodMode", "Enabled") -> value or nil
 features.set("GodMode", "Enabled", true) -> true
