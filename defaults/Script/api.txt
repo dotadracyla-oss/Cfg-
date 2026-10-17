@@ -128,7 +128,10 @@ settings.list() -> array of {name,type,min,max}
 Booleans require true/false; integer fields require whole numbers.
 Changes apply through existing Unix logic. Use Save or Auto Save to persist.
 Color fields: ui_accent0..3, skeleton_color0..3, map_tint0..3,
-lighting_color0..3, crosshair_color0..3; channels 0..1, unlike ui/render colors.
+lighting_color0..3, crosshair_color0..3, ghost_chams_color0..3, arm_chams_color0..3,
+item_chams_color0..3; channels 0..1, unlike ui/render colors.
+Self tab: infinite_stamina, speed_hack, speed_multiplier (0.25..100), custom_fov, fov,
+third_person, third_person_distance, arm_chams, item_chams (+ _style, _color, item_chams_range).
 ui_language: 0=English (default), 1=Russian. Script text is controlled by the
 script; check settings.get("ui_language") for your own translations.
 ui_theme: 0=Night, 1=Light; ui_menu_key: Windows virtual-key code.
@@ -159,6 +162,8 @@ Renaming a script changes its storage identity.
 Console and limits
 ------------------
 Lua > Open console opens the separate console; errors open it automatically.
+The console follows the menu: it hides when the menu closes and returns when the menu
+opens, unless it was closed explicitly (Esc or the close button).
 Errors only/Search filter entries. Copy copies visible text; Export logs
 writes C:\Unix\Script\logs\<script>.lua.log. Clear does not restart a script.
 History: 256 entries/script, up to 16384 characters/message. Errors include
@@ -215,8 +220,10 @@ fov                             number     30..140
 brightness                      number     0.1..5
 map_color                       boolean    0..1
 infinite_stamina                boolean    0..1
+third_person                    boolean    0..1
+third_person_distance           number     0.5..5
 speed_hack                      boolean    0..1
-speed_multiplier                number     0.25..10
+speed_multiplier                number     0.25..100
 speed_bind                      integer    0..5
 custom_lighting                 boolean    0..1
 lighting_power                  number     0.1..5
@@ -239,6 +246,11 @@ crosshair_size                  number     6..160
 crosshair_thickness             number     1..8
 crosshair_rotation_speed        number     -360..360
 crosshair_rainbow_speed         number     0.02..1
+arm_chams                       boolean    0..1
+arm_chams_style                 integer    0..1
+item_chams                      boolean    0..1
+item_chams_style                integer    0..1
+item_chams_range                number     5..100
 ghost_chams_color0              number     0..1
 ghost_chams_color1              number     0..1
 ghost_chams_color2              number     0..1
@@ -263,6 +275,14 @@ crosshair_color0                number     0..1
 crosshair_color1                number     0..1
 crosshair_color2                number     0..1
 crosshair_color3                number     0..1
+arm_chams_color0                number     0..1
+arm_chams_color1                number     0..1
+arm_chams_color2                number     0..1
+arm_chams_color3                number     0..1
+item_chams_color0               number     0..1
+item_chams_color1               number     0..1
+item_chams_color2               number     0..1
+item_chams_color3               number     0..1
 ui_scale                        number     0.5..3
 
 
@@ -288,7 +308,11 @@ browser.place(x,y,z,yaw=0,width=2.4,height=1.35) sets the world panel position i
 browser.status() -> {running, ready, frames, title, error}; ready means WebView2 is ready.
 One shared page/profile for all scripts. Call mutations from callbacks.
 2D: address bar, back, reload, close, mouse, wheel and keyboard. 3D button places the panel ahead.
-3D uses a real Unity quad, external D3D11 texture and Unlit/Texture material; scene depth applies.
+3D uses a real Unity quad, an external D3D11 shader-resource view and an unlit material
+(Universal Render Pipeline/Unlit, falling back to Unlit/Texture); scene depth applies.
+Page frames are captured as JPEG at 15 fps for the 2D window and 10 fps for the world
+panel; nothing is captured while neither surface is visible. browser.status().error also
+carries 3D progress text ("3D: waiting for the first page frame", "3D: surface at ...").
 Click a world panel to focus input; Escape releases keyboard focus.
 Requires Microsoft Edge WebView2 Runtime. Chromium keeps normal TLS verification.
 The browser capture runs on a separate STA thread and is uploaded at up to 15 frames/second.

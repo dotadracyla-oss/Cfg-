@@ -20,7 +20,11 @@ browser.place(x,y,z,yaw=0,width=2.4,height=1.35) sets the world panel position i
 browser.status() -> {running, ready, frames, title, error}; ready means WebView2 is ready.
 One shared page/profile for all scripts. Call mutations from callbacks.
 2D: address bar, back, reload, close, mouse, wheel and keyboard. 3D button places the panel ahead.
-3D uses a real Unity quad, external D3D11 texture and Unlit/Texture material; scene depth applies.
+3D uses a real Unity quad, an external D3D11 shader-resource view and an unlit material
+(Universal Render Pipeline/Unlit, falling back to Unlit/Texture); scene depth applies.
+Page frames are captured as JPEG at 15 fps for the 2D window and 10 fps for the world
+panel; nothing is captured while neither surface is visible. browser.status().error also
+carries 3D progress text ("3D: waiting for the first page frame", "3D: surface at ...").
 Click a world panel to focus input; Escape releases keyboard focus.
 Requires Microsoft Edge WebView2 Runtime. Chromium keeps normal TLS verification.
 The browser capture runs on a separate STA thread and is uploaded at up to 15 frames/second.
