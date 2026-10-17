@@ -247,6 +247,10 @@ crosshair_thickness             number     1..8
 crosshair_rotation_speed        number     -360..360
 crosshair_rainbow_speed         number     0.02..1
 discord_rpc                     boolean    0..1
+discord_rpc_ghost               boolean    0..1
+discord_rpc_sanity              boolean    0..1
+ui_menu_mode                    integer    0..1
+sync_enabled                    boolean    0..1
 ghost_chams_color0             number     0..1
 ghost_chams_color1              number     0..1
 ghost_chams_color2              number     0..1
