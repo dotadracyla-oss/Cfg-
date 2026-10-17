@@ -10,6 +10,7 @@ client.on("on_frame", function(dt)
     local status = game.status()
     local ghost = game.ghost()
     local px, py = x:get(), y:get()
+    if render.drag then px, py = render.drag("main", px, py, 300, 94) end
     render.rect_filled(px, py, 300, 94, render.color(12, 12, 18, 220), 8)
     render.rect_filled(px, py, 3, 94, accent:get(), 1)
     render.text(px + 14, py + 12, accent:get(), "Unix / Lua HUD", 17)

@@ -8,7 +8,7 @@
     },
     {
       "path": "Script/01_hud.lua",
-      "sha256": "f8b8f07e8ddb781c1ca5d1e3052afa0b0a4d74b51b3f1d453b194cb7be38dffb"
+      "sha256": "071f6e15e301201673e3054e1876ea7949876f84b1123dda987240fe16bf2940"
     },
     {
       "path": "Script/02_events.lua",
@@ -20,19 +20,23 @@
     },
     {
       "path": "Script/api.txt",
-      "sha256": "9dcda9c6911fa738389df35947bb0a76cb08f1cc832efd535eb5e8e3b474fe8f"
+      "sha256": "20f1800c78a98dd156bb153f1e750d708a504ce7728dd0d6c527baf94b7bf0a8"
     },
     {
-      "sha256": "8b949f75ba84545b6adb7b6b8dbb198e4530660f2af3131a539ff5ee2a31b48e",
+      "sha256": "0ac88870f69a71510820d7657e4de4721220ea478c8b94bcdd98bf2fdfc975f5",
       "path": "Script/api_v2.txt"
     },
     {
-      "sha256": "00525211582e4ed62e5aaf124523957931f213a73332e6e3b57d162f77a59ec5",
+      "sha256": "6269db1d399175ed7b5216680a4ea90fddbb2d5e2b37eac6ae9fd9b0d2615d85",
       "path": "Script/04_transparent_hud.lua"
     },
     {
       "sha256": "62a1700c3135a2e395306e98b61c5cd8b444251feb5e65e8d67fdfef15e579d4",
       "path": "Script/05_http.lua"
+    },
+    {
+      "sha256": "5bc3579ed5e057163d73ad02e6d3d2a2e087909f591367348f30651125fc4de1",
+      "path": "Script/06_draggable_hud.lua"
     }
   ]
 }

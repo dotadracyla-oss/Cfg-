@@ -1,4 +1,7 @@
 Unix Lua API 2.0 - extensions (API names are English)
+render.drag(id, default_x, default_y, width, height) -> x, y
+Use returned coordinates for HUD drawing. Drag while menu or Lua console is open.
+Positions persist per script and HUD id; 32 regions maximum; clamped to the screen.
 render.opacity(value) -- 0..1, multiplies alpha for subsequent drawing calls.
 render.layer("background" | "foreground") -- background draws below Unix UI.
 Both reset at each callback. render colors use {r,g,b,a} in 0..255.
