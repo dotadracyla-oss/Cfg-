@@ -282,6 +282,25 @@ Native achievements have no Lua endpoint. game.incense() exposes historical
 use/elapsed data only; there is no game.crucifix() or protection countdown API.
 Reference updated: 2026-10-23. Runtime API version remains 2.0.
 
+Bundled examples
+----------------
+01_hud.lua: configurable telemetry HUD.
+02_events.lua: hunt, ghost-event and incense notifications.
+03_crosshair.lua: custom crosshair.
+04_transparent_hud.lua: transparent background and draw layers.
+05_http.lua: asynchronous HTTP polling on button click.
+06_draggable_hud.lua: draggable HUD with saved placement.
+07_browser.lua: shared browser in 2D, 3D or both modes.
+08_world_browser.lua: 3D panel, world position/size and status HUD.
+09_protection_controls.lua: native incense, crucifix and stream-proof controls.
+10_feature_catalog.lua: read-only settings, feature groups and action IDs.
+
+Install .lua files in C:\Unix\Script, Refresh scripts, select one and Load.
+Browser examples require WebView2 Runtime and explicit button clicks. World
+placement requires a live player camera/scene. Browser state is shared between
+scripts; use one browser controller at a time. Stop may close its shared page.
+Examples do not enable autorun. Native-setting changes remain after Stop.
+
 Settings reference
 ------------------
 

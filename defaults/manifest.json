@@ -8,11 +8,11 @@
     },
     {
       "path": "Script/01_hud.lua",
-      "sha256": "ced6696f093f9c006e723f99d2490a0c8dd08967d4de5f5c35197511db15f554"
+      "sha256": "071f6e15e301201673e3054e1876ea7949876f84b1123dda987240fe16bf2940"
     },
     {
       "path": "Script/02_events.lua",
-      "sha256": "d48eb1d27d01f73cc112a88c7809c86120736bf1cabd09f10111468a236b94c2"
+      "sha256": "25cafb30cb05f5ed33f160b2d387de322ca289d6e6d396fce1cb796b067becf4"
     },
     {
       "path": "Script/03_crosshair.lua",
@@ -20,27 +20,39 @@
     },
     {
       "path": "Script/api.txt",
-      "sha256": "bd56240c3f8fe206ad42ac027e0a74c32cc1ee828c165e92e795991d8fb390df"
+      "sha256": "96cf9343a8d799d7a5570ebc297005b74bce2c4b56ca09d94899dd40c4e0d816"
     },
     {
       "sha256": "7ce8ff13e74a2bc04f2be12671d2e386031181d3c713a22ea58e560c2d56fb3c",
       "path": "Script/api_v2.txt"
     },
     {
-      "sha256": "9bf5a0397215a77cc2b3dad440d4c0e1067f705161ea12ada8b9b338aeb5b098",
+      "sha256": "6269db1d399175ed7b5216680a4ea90fddbb2d5e2b37eac6ae9fd9b0d2615d85",
       "path": "Script/04_transparent_hud.lua"
     },
     {
-      "sha256": "6b4aee79e1cf2c6b259c655109b0df7f80bc6ccd078c79bab61eb288533edec3",
+      "sha256": "62a1700c3135a2e395306e98b61c5cd8b444251feb5e65e8d67fdfef15e579d4",
       "path": "Script/05_http.lua"
     },
     {
-      "sha256": "0ae733922c6952707c0e099b38d271df67cfa3c998944960c9250beee3e83167",
+      "sha256": "5bc3579ed5e057163d73ad02e6d3d2a2e087909f591367348f30651125fc4de1",
       "path": "Script/06_draggable_hud.lua"
     },
     {
       "path": "Script/07_browser.lua",
-      "sha256": "6178cc416f261770e0d7632d861bdc00611d94f94f0f040e8a6a53da025de3e1"
+      "sha256": "89775c24ee9f3efe072119045c2d701d521b35a129032080aca0a29e53dd0657"
+    },
+    {
+      "path": "Script/08_world_browser.lua",
+      "sha256": "b41faba5a22848eaa7f4fc6a79450c14432a5cd0cd45037c0564c720b57b7fa5"
+    },
+    {
+      "path": "Script/09_protection_controls.lua",
+      "sha256": "cbcf20a0b3c0cccfee30d7b17ac4df4de5ba30fcfd55a097cb114cc546618cd0"
+    },
+    {
+      "path": "Script/10_feature_catalog.lua",
+      "sha256": "9d68c8879f9641d9c34541d6a41706eb11e75eddfd3b51b3450a1daad99e9a9f"
     }
   ]
 }
