@@ -11,7 +11,9 @@ Methods: GET POST PUT PATCH DELETE HEAD OPTIONS. HTTP and HTTPS, normal TLS veri
 http.poll(request_id) -> nil while pending; response table once complete.
 Response: {ok, status, body, headers, error}. Unknown/consumed ID: nil, error.
 Maximum 8 outstanding requests per script, request body 256 KiB, response 1 MiB.
-Network runs on workers. Pending workers are joined when the script unloads.
+Network runs on workers. Stop discards script request handles without waiting
+for workers; background jobs are retained externally and drained before DLL unload.
+There is a global limit of 256 pending jobs, including jobs from stopped scripts.
 browser.open(url, mode="2d") -> queued (boolean). Embedded WebView2; HTTP/HTTPS only.
 Modes: "2d" on-screen window, "3d" Unity world surface, "both" shared page in both.
 browser.close() hides both surfaces and stops page navigation/audio.
@@ -34,7 +36,16 @@ features.get("GodMode", "Enabled") -> value or nil
 features.set("GodMode", "Enabled", true) -> true
 Feature colors use normalized RGBA {0..1,0..1,0..1,0..1}; unlike render colors.
 features.actions() -> available stable action IDs
-features.trigger("action_Teleport_Truck") -> known_action
+features.trigger("action_Teleport_Truck") -> dispatched (boolean)
+False means unavailable/unknown action or unsuitable runtime state. True means
+the registered handler ran, not that its game-side effect necessarily succeeded.
 Call HTTP, browser and feature mutations from callbacks, not at script top level.
 Actions still require the relevant game state/host permissions.
 Native Unix settings remain accessible through settings.list/get/set.
+
+Use features.list() and features.actions() at runtime for the installed build.
+The ported-feature registry is separate from settings.list(); current native
+protection HUD keys are incense_timer and crucifix_hud via settings.set.
+Native achievements have no Lua endpoint. game.incense() exposes historical
+use/elapsed data only; there is no game.crucifix() or protection countdown API.
+Reference updated: 2026-10-23. Runtime API version remains 2.0.

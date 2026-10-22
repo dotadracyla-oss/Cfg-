@@ -1,4 +1,5 @@
 UNIX LUA API - v2.0
+Reference updated: 2026-10-23. Runtime API version remains 2.0.
 Extensions: see api_v2.txt (HTTP/HTTPS, browser, features, transparent HUD).
 ==================
 
@@ -14,12 +15,13 @@ Reload on file change watches the file. Subdirectories/symlinks are not scanned.
 Filenames support ASCII letters, digits, spaces, underscores and hyphens.
 Loading a script does not reload the game DLL.
 
-The first normal injector launch downloads the default config, three scripts
-and this document from GitHub. Completion marker: C:\Unix\.github-defaults-v1.
-Existing user files are preserved. Failed downloads are retried next launch;
-embedded defaults provide an offline fallback. A private repository requires
-read credentials. No GitHub token is embedded. Examples do not autorun.
-The Lua runtime also refreshes api.txt from its embedded documentation.
+After the first authenticated loader login, defaults are installed into
+C:\Unix\Config and C:\Unix\Script. Existing files are preserved; failed
+installations are retried on the next login. The loader has embedded fallback
+files. The config/docs repository is dotadracyla-oss/Cfg- (defaults/Script).
+The Lua runtime refreshes api.txt and api_v2.txt from the documentation embedded
+in the installed DLL. Updating GitHub documentation alone does not update an
+already installed DLL's embedded copy. Examples do not autorun by default.
 
 Example:
     local enabled = ui.checkbox("enabled", "My text", true)
@@ -186,10 +188,99 @@ Build and sources
 -----------------
 Visual Studio: Release | x64. Lua is compiled as C++ for exception unwinding.
 src/scripting/runtime.cpp: lifecycle, budgets, events, timers, persistence.
-src/scripting/api.cpp: all API modules.
+src/scripting/api.cpp and extended_api.hpp: Lua API modules.
 src/ui/portfolio/pages/lua_page.cpp: manager and console.
 src/scripting/bundled_examples.hpp: embedded examples/documentation.
 Offline previews/tests do not validate live game telemetry.
+
+Current features and availability (2026-10-23)
+----------------------------------------------
+settings.set("incense_timer", true): enable the native incense HUD, including
+ordinary-hunt prevention and the separate distraction countdown. Duration
+depends on the effective ghost type; attaching mid-effect can leave the start
+unknown. Reapplying while prevention is active does not reset its timer.
+settings.set("crucifix_hud", true): enable the native crucifix HUD with remaining
+uses, base radius, distance and the stopped-cursed-hunt indication. A crucifix
+has no fixed timed protection effect. Item presence does not mean full coverage.
+game.incense() still returns ONLY available, used_at and elapsed. There is no
+game.crucifix(), protection remaining/duration field, or protection-change event
+in this Lua build. Do not derive guaranteed protection from elapsed alone.
+settings.set("streamproof", true): enable the native stream-proof setting.
+Capture behavior depends on the capture method; this is not a Lua drawing flag.
+Achievements are available in the native menu, with progress checks and the
+unlock button disabled when complete. There is no Lua achievements module,
+settings key or unlock-all callback in this build.
+
+For current native settings use settings.list(); for transferred feature
+settings use features.list(). They are separate namespaces. Enumerate instead
+of assuming that every menu button is exported as a Lua action.
+settings.set may be used at file scope: initial changes are staged until a
+successful load. Feature/browser mutations and HTTP requests require callbacks.
+
+Example (enable native protection cards from a Lua control):
+    local cards = ui.checkbox("protection_cards", "Protection cards", false)
+    client.on("on_ui_change", function(id, value)
+        if id == "protection_cards" then
+            settings.set("incense_timer", value)
+            settings.set("crucifix_hud", value)
+        end
+    end)
+Changing settings affects shared Unix state. Stop does not undo those changes.
+
+
+Extensions
+----------
+Unix Lua API 2.0 - extensions (API names are English)
+render.drag(id, default_x, default_y, width, height) -> x, y
+Use returned coordinates for HUD drawing. Drag while menu or Lua console is open.
+Positions persist per script and HUD id; 32 regions maximum; clamped to the screen.
+render.opacity(value) -- 0..1, multiplies alpha for subsequent drawing calls.
+render.layer("background" | "foreground") -- background draws below Unix UI.
+Both reset at each callback. render colors use {r,g,b,a} in 0..255.
+Alpha 0 is invisible, 128 is translucent, 255 is opaque. No HUD background is implicit.
+http.request(url, {method="GET", body="", headers={Accept="application/json"}}) -> request_id
+Methods: GET POST PUT PATCH DELETE HEAD OPTIONS. HTTP and HTTPS, normal TLS verification.
+http.poll(request_id) -> nil while pending; response table once complete.
+Response: {ok, status, body, headers, error}. Unknown/consumed ID: nil, error.
+Maximum 8 outstanding requests per script, request body 256 KiB, response 1 MiB.
+Network runs on workers. Stop discards script request handles without waiting
+for workers; background jobs are retained externally and drained before DLL unload.
+There is a global limit of 256 pending jobs, including jobs from stopped scripts.
+browser.open(url, mode="2d") -> queued (boolean). Embedded WebView2; HTTP/HTTPS only.
+Modes: "2d" on-screen window, "3d" Unity world surface, "both" shared page in both.
+browser.close() hides both surfaces and stops page navigation/audio.
+browser.place(x,y,z,yaw=0,width=2.4,height=1.35) sets the world panel position in Unity units.
+3D opening automatically places the panel 2.5 units in front of the current player camera.
+browser.status() -> {running, ready, frames, title, error}; ready means WebView2 is ready.
+One shared page/profile for all scripts. Call mutations from callbacks.
+2D: address bar, back, reload, close, mouse, wheel and keyboard. 3D button places the panel ahead.
+3D uses a real Unity quad, an external D3D11 shader-resource view and an unlit material
+(Universal Render Pipeline/Unlit, falling back to Unlit/Texture); scene depth applies.
+Page frames are captured as JPEG at 15 fps for the 2D window and 10 fps for the world
+panel; nothing is captured while neither surface is visible. browser.status().error also
+carries 3D progress text ("3D: waiting for the first page frame", "3D: surface at ...").
+Click a world panel to focus input; Escape releases keyboard focus.
+Requires Microsoft Edge WebView2 Runtime. Chromium keeps normal TLS verification.
+The browser capture runs on a separate STA thread and is uploaded at up to 15 frames/second.
+Native Unity panel rendering/interaction must be verified in-game for the installed build.
+features.list() -> {FeatureName={SettingName=value,...},...}
+features.get("GodMode", "Enabled") -> value or nil
+features.set("GodMode", "Enabled", true) -> true
+Feature colors use normalized RGBA {0..1,0..1,0..1,0..1}; unlike render colors.
+features.actions() -> available stable action IDs
+features.trigger("action_Teleport_Truck") -> dispatched (boolean)
+False means unavailable/unknown action or unsuitable runtime state. True means
+the registered handler ran, not that its game-side effect necessarily succeeded.
+Call HTTP, browser and feature mutations from callbacks, not at script top level.
+Actions still require the relevant game state/host permissions.
+Native Unix settings remain accessible through settings.list/get/set.
+
+Use features.list() and features.actions() at runtime for the installed build.
+The ported-feature registry is separate from settings.list(); current native
+protection HUD keys are incense_timer and crucifix_hud via settings.set.
+Native achievements have no Lua endpoint. game.incense() exposes historical
+use/elapsed data only; there is no game.crucifix() or protection countdown API.
+Reference updated: 2026-10-23. Runtime API version remains 2.0.
 
 Settings reference
 ------------------
@@ -198,6 +289,9 @@ Setting                         Type       Range
 ghost_chams                     boolean    0..1
 ghost_chams_style               integer    0..1
 ghost_chams_intensity           number     1..10
+ghost_arrow                     boolean    0..1
+ghost_arrow_size                number     6..48
+ghost_arrow_radius              number     30..500
 ui_auto_save                    boolean    0..1
 ui_theme                        integer    0..1
 ui_language                     integer    0..1
@@ -208,6 +302,7 @@ cursed_esp                      boolean    0..1
 exit_esp                        boolean    0..1
 hiding_esp                      boolean    0..1
 incense_timer                   boolean    0..1
+crucifix_hud                    boolean    0..1
 room_info                       boolean    0..1
 active_list                     boolean    0..1
 speed_bind_mode                 integer    0..1
@@ -222,6 +317,8 @@ map_color                       boolean    0..1
 infinite_stamina                boolean    0..1
 third_person                    boolean    0..1
 third_person_distance           number     0.5..5
+map_xray                        boolean    0..1
+map_transparency                number     0..100
 speed_hack                      boolean    0..1
 speed_multiplier                number     0.25..100
 speed_bind                      integer    0..5
@@ -232,6 +329,13 @@ player_sanity                   boolean    0..1
 ghost_notifications             boolean    0..1
 custom_exposure                 boolean    0..1
 exposure                        number     -5..5
+players_room                    boolean    0..1
+players_temperature             boolean    0..1
+players_level                   boolean    0..1
+players_experience              boolean    0..1
+players_prestige                boolean    0..1
+players_hacker                  boolean    0..1
+players_average                 boolean    0..1
 hunt_timer                      boolean    0..1
 player_labels                   boolean    0..1
 ghost_info                      boolean    0..1
@@ -247,9 +351,16 @@ crosshair_thickness             number     1..8
 crosshair_rotation_speed        number     -360..360
 crosshair_rainbow_speed         number     0.02..1
 discord_rpc                     boolean    0..1
+custom_ghost                    boolean    0..1
+custom_ghost_always             boolean    0..1
+custom_ghost_model              integer    0..255
+custom_ghost_height             number     0.3..4
+custom_ghost_yaw                number     0..360
+custom_ghost_lift               number     -1..1
 ui_menu_mode                    integer    0..1
 sync_enabled                    boolean    0..1
-ghost_chams_color0             number     0..1
+streamproof                     boolean    0..1
+ghost_chams_color0              number     0..1
 ghost_chams_color1              number     0..1
 ghost_chams_color2              number     0..1
 ghost_chams_color3              number     0..1
@@ -274,45 +385,3 @@ crosshair_color1                number     0..1
 crosshair_color2                number     0..1
 crosshair_color3                number     0..1
 ui_scale                        number     0.5..3
-
-
-Unix Lua API 2.0 - extensions (API names are English)
-render.drag(id, default_x, default_y, width, height) -> x, y
-Use returned coordinates for HUD drawing. Drag while menu or Lua console is open.
-Positions persist per script and HUD id; 32 regions maximum; clamped to the screen.
-render.opacity(value) -- 0..1, multiplies alpha for subsequent drawing calls.
-render.layer("background" | "foreground") -- background draws below Unix UI.
-Both reset at each callback. render colors use {r,g,b,a} in 0..255.
-Alpha 0 is invisible, 128 is translucent, 255 is opaque. No HUD background is implicit.
-http.request(url, {method="GET", body="", headers={Accept="application/json"}}) -> request_id
-Methods: GET POST PUT PATCH DELETE HEAD OPTIONS. HTTP and HTTPS, normal TLS verification.
-http.poll(request_id) -> nil while pending; response table once complete.
-Response: {ok, status, body, headers, error}. Unknown/consumed ID: nil, error.
-Maximum 8 outstanding requests per script, request body 256 KiB, response 1 MiB.
-Network runs on workers. Pending workers are joined when the script unloads.
-browser.open(url, mode="2d") -> queued (boolean). Embedded WebView2; HTTP/HTTPS only.
-Modes: "2d" on-screen window, "3d" Unity world surface, "both" shared page in both.
-browser.close() hides both surfaces and stops page navigation/audio.
-browser.place(x,y,z,yaw=0,width=2.4,height=1.35) sets the world panel position in Unity units.
-3D opening automatically places the panel 2.5 units in front of the current player camera.
-browser.status() -> {running, ready, frames, title, error}; ready means WebView2 is ready.
-One shared page/profile for all scripts. Call mutations from callbacks.
-2D: address bar, back, reload, close, mouse, wheel and keyboard. 3D button places the panel ahead.
-3D uses a real Unity quad, an external D3D11 shader-resource view and an unlit material
-(Universal Render Pipeline/Unlit, falling back to Unlit/Texture); scene depth applies.
-Page frames are captured as JPEG at 15 fps for the 2D window and 10 fps for the world
-panel; nothing is captured while neither surface is visible. browser.status().error also
-carries 3D progress text ("3D: waiting for the first page frame", "3D: surface at ...").
-Click a world panel to focus input; Escape releases keyboard focus.
-Requires Microsoft Edge WebView2 Runtime. Chromium keeps normal TLS verification.
-The browser capture runs on a separate STA thread and is uploaded at up to 15 frames/second.
-Native Unity panel rendering/interaction must be verified in-game for the installed build.
-features.list() -> {FeatureName={SettingName=value,...},...}
-features.get("GodMode", "Enabled") -> value or nil
-features.set("GodMode", "Enabled", true) -> true
-Feature colors use normalized RGBA {0..1,0..1,0..1,0..1}; unlike render colors.
-features.actions() -> available stable action IDs
-features.trigger("action_Teleport_Truck") -> known_action
-Call HTTP, browser and feature mutations from callbacks, not at script top level.
-Actions still require the relevant game state/host permissions.
-Native Unix settings remain accessible through settings.list/get/set.
